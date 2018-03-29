@@ -20,8 +20,6 @@ class FileStats:
         return hash_md5.hexdigest()
 
     def __init__(self, path, base):
-        #print(path)
-        #print(base)
         self.relpath = os.path.relpath(path,base)
         self.abspath = os.path.join(base, path)
         self.md5  = self.getMd5()
@@ -48,5 +46,4 @@ else:
     path = sys.argv[1]
     if (path[0]!="/" and path[0]!="~"):
         path = os.path.join(os.path.abspath(os.path.dirname(__file__)),path)
-    print(path)
     Main(path)
