@@ -11,7 +11,7 @@ class FileStats:
     version = None
 
     def getModDate(self):
-        return os.path.getmtime(self.path)
+        return os.path.getmtime(self.abspath)
 
     def getMd5(self):
         hash_md5 = md5()
@@ -21,7 +21,7 @@ class FileStats:
 
     def __init__(self, path, base):
         self.relpath = path
-        self.abspath = os.path.join(base,path)
+        self.abspath = os.path.join(base, path)
         self.md5  = self.getMd5()
         self.dateMod = self.getModDate()
 
@@ -42,7 +42,7 @@ def Main(path):
         print("\n")
 
 if (len(sys.argv)<=1):
-    print("No files provided")
+    raise Exception("No path provided")
 else:
     path = sys.argv[1]
     Main(path)
