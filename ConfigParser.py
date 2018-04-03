@@ -3,11 +3,12 @@
 import sys
 import json
 import io
+import os
 import csv
 from urllib import request, parse
 
 class FieldDef:
-    def __init__(self, line, sub = False):
+    def __init__(self, line):
         parts = line.split("-")
         self.Comment = parts[1] if (len(parts) > 1) else ""
         data = parts[0].split(" ")
@@ -15,8 +16,6 @@ class FieldDef:
         self.Type = data[1]
         self.IsArray = "[]" in data
         self.Fields = []
-
-
         if ( self.Type == "object" ):
             record = False
             line=""
@@ -29,11 +28,8 @@ class FieldDef:
                 if (record): line+=" " + i
                 if (i[0]=="{"): record = True
 
-            self.Fields = [FieldDef(field.strip(), True) for field in line.split(",")]
+            self.Fields = [FieldDef(field.strip()) for field in line.split(",")]
         self.Params = data[2:] if (len(parts) > 2) else ""
-    def ToJson(self):
-        pass
-
 
 class SchemeDefinition:
     def __init__(self,base,row):
@@ -53,11 +49,10 @@ class SchemeDefinition:
         data = self.Data.read().decode("utf-8").splitlines()
         self.Data = self.ParseData(headLines,data)
 
-
     def ParseData(self, headlines, data):
         def SetType(type,item):
             if (item == None):return item
-                
+
             if type=="int":
                 return int(item) if item!="" else 0
             elif type=="string":
@@ -69,15 +64,10 @@ class SchemeDefinition:
             for f in fields:
                 for i in range(f[0],f[0]+f[1]):
                     row[i]=None
-
-
             result = "".join([r for  r in row if r!=None])
             return result==""
-
         items = []
         array_items = [[self.Fields.index(f), len(f.Fields)] for f in self.Fields if f.IsArray]
-
-
 
         rows_index = 0
         for row in csv.reader(data, csv.excel, delimiter=","):
@@ -93,10 +83,6 @@ class SchemeDefinition:
             if (len(list(filter(None,row)))==0): continue
             item = items[-1]
 
-
-
-
-
             cell_index: int = 0
             for field in self.Fields:
 
@@ -104,9 +90,6 @@ class SchemeDefinition:
                     continue
 
                 val = row[cell_index]
-
-
-                #item[field.Name]=int(row[cell_index])
 
                 if field.Type=="none":
                     pass
@@ -129,9 +112,6 @@ class SchemeDefinition:
                     cell_index+=1
         return items
 
-
-
-
 def Download(url, name):
     name = parse.quote(name)
     response = request.urlopen(url+name)
@@ -141,19 +121,25 @@ def Download(url, name):
 def ParseScheme(url, name = ""):
     main_scheme = Download(url,name).read().decode("utf-8").splitlines()
     schemes = [SchemeDefinition(url,row) for row in csv.reader(main_scheme, csv.excel, delimiter=",")]
+    return schemes
+
+
+def Main(id, out):
+    #url = "https://docs.google.com/spreadsheets/d/"+"1yqt-aFkltJpcWbh5Je7xUDgtNOcyw22CCr3WhHTVVRo" + "/gviz/tq?tqx=out:csv&sheet="
+    #url = "https://docs.google.com/spreadsheets/d/"+"1yqt-aFkltJpcWbh5Je7xUDgtNOcyw22CCr3WhHTVVRo" + "/gviz/tq?tqx=out:csv&sheet="
+    url = "https://docs.google.com/spreadsheets/d/"+id+ "/gviz/tq?tqx=out:csv&sheet="
+    print("parsing "+url)
+    schemes = ParseScheme(url)
+    if not os.path.exists(out):
+        os.mkdir(out)
     for scheme in schemes:
-        with io.open(scheme.Name+".json", 'w', encoding='utf8') as json_file:
+        with io.open(os.path.join(out,scheme.Name+".json"), 'w', encoding='utf8') as json_file:
             json.dump(scheme.Data, json_file, ensure_ascii=False)
-
-
-def Main(url = ""):
-    url = "https://docs.google.com/spreadsheets/d/"+"1yqt-aFkltJpcWbh5Je7xUDgtNOcyw22CCr3WhHTVVRo" + "/gviz/tq?tqx=out:csv&sheet="
-    name = ""
-    ParseScheme(url, name)
     pass
 
-if (len(sys.argv)<=1):
+if (len(sys.argv)<=2):
     raise Exception("No url provided")
 else:
-    url = sys.argv[1]
-    Main(url)
+    id = sys.argv[1]
+    out = sys.argv[2]
+    Main(id,  out)
