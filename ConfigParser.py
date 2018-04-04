@@ -99,10 +99,6 @@ class SchemeDefinition:
                 elif field.Type=="object":
                     val={}
                     for sub in field.Fields:
-                        if (sub.Name == "Index"):
-                            print(row)
-                            print(cell_index)
-                            print(row[cell_index])
                         val[sub.Name] = SetType(sub.Type,row[cell_index])
                         cell_index+=1
 
