@@ -65,16 +65,27 @@ class SchemeDefinition:
             for f in fields:
                 for i in range(f[0],f[0]+f[1]):
                     _row[i]=None
-            result = "".join([r for  r in row if r!=None])
+            result = "".join([r for  r in _row if r!=None])
             return result==""
+
+
+
+
         items = []
         array_items = [[self.Fields.index(f), len(f.Fields)] for f in self.Fields if f.IsArray]
 
         rows_index = 0
         for row in csv.reader(data, csv.excel, delimiter=","):
+
+
             if (rows_index<headlines):
                 rows_index+=1
                 continue
+
+            #if (self.Name=="Groups"):
+            #    print(row)
+            #    print(">>>>")
+
 
 
             in_array : bool = InArray(row, array_items)
