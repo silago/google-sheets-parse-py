@@ -2,7 +2,12 @@
 # coding: utf8
 
 class FieldDef:
-    def __init__(self, line):
+    def __init__(self, input_line):
+        at_lines = input_line.split("@")
+        line = at_lines[-1]
+        self.DbName=at_lines[0]
+
+
         parts = line.split("-")
         self.Comment = parts[1] if (len(parts) > 1) else ""
         data = parts[0].split(" ")

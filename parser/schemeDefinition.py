@@ -1,7 +1,13 @@
 #! /usr/bin/env python
 # coding: utf8
 import csv
-from . import FieldDef
+from urllib import request, parse
+from . import fieldDef
+
+def Download(url, name):
+    name = parse.quote(name)
+    response = request.urlopen(url + name)
+    return response
 
 
 class SchemeDefinition:
@@ -17,7 +23,7 @@ class SchemeDefinition:
         for line in scheme[1:]:
             l = line.strip()
             if l != "" and l[0] != "#":
-                self.Fields += FieldDef(l),
+                self.Fields += fieldDef.FieldDef(l),
 
         headLines = int(scheme[0].split(" ")[1])
         data = self.Data.read().decode("utf-8").splitlines()
