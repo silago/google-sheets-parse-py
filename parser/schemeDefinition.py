@@ -33,6 +33,8 @@ class SchemeDefinition:
         def SetType(type, item):
             if item is None:
                 return item
+            if type == "float":
+                return float(item) if item != "" else float(0)
             if type == "int":
                 return int(item) if item != "" else 0
             elif type == "string":
