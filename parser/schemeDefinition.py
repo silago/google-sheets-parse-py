@@ -22,7 +22,7 @@ class SchemeDefinition:
         header = self.Scheme[0].split(",")
         self.Attrs = {}
         for h in header:
-            key, value, *(rest) = h.strip().split(" ")
+            key, value, *(rest) = h.strip().split("=")
             self.Attrs[key]=value
 
         for line in self.Scheme[1:]:
@@ -65,7 +65,6 @@ class SchemeDefinition:
             if f.IsArray: array_items += [self.Fields.index(f) + a_offset, (len(f.Fields) if f.Type=="object" else 1)],
             if f.Type == "object": a_offset += len(f.Fields) - 1
 
-        print(array_items)
         rows_index = 0
         for row in csv.reader(data, csv.excel, delimiter=","):
             if rows_index < headlines:
