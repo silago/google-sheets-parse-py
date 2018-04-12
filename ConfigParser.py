@@ -9,8 +9,6 @@ from urllib import request, parse
 from parser import schemeDefinition as sd
 
 
-
-
 def Download(url, name):
     name = parse.quote(name)
     response = request.urlopen(url + name)
@@ -30,6 +28,8 @@ def Main(id, out):
     if not os.path.exists(out):
         os.mkdir(out)
     for scheme in schemes:
+        if (not scheme.Name): continue
+        scheme.Data = scheme.ParseData()
         with io.open(os.path.join(out, scheme.Name + ".json"), 'w', encoding='utf8') as json_file:
             json.dump(scheme.Data, json_file, ensure_ascii=False)
     pass

@@ -16,20 +16,22 @@ class SchemeDefinition:
         fields = row
         self.Name = fields[0]
         self.ListName = fields[1]
-        scheme = fields[2].split(";")
-        if len(scheme) <= 1: return
+        self.Scheme = fields[2].split(";")
+        self.Base = base
+        if len(self.Scheme) <= 1: return
+        header = self.Scheme[0].split(",")
+        self.Attrs = {}
+        for h in header:
+            key, value, *(rest) = h.strip().split(" ")
+            self.Attrs[key]=value
 
-        self.Data = Download(base, self.ListName)
-        for line in scheme[1:]:
+        for line in self.Scheme[1:]:
             l = line.strip()
             if l != "" and l[0] != "#":
                 self.Fields += fieldDef.FieldDef(l),
 
-        headLines = int(scheme[0].split(" ")[1])
-        data = self.Data.read().decode("utf-8").splitlines()
-        self.Data = self.ParseData(headLines, data)
 
-    def ParseData(self, headlines, data):
+    def ParseData(self):
         def SetType(type, item):
             if item is None:
                 return item
@@ -51,13 +53,19 @@ class SchemeDefinition:
             result = "".join([r for r in _row if r != None])
             return result == ""
 
+        raw_data  = Download(self.Base, self.ListName)
+        headlines = int(self.Attrs.get("Header"))
+        data = raw_data.read().decode("utf-8").splitlines()
+
+
         items = []
         array_items = []
         a_offset = 0
         for f in self.Fields:
-            if f.IsArray: array_items += [self.Fields.index(f) + a_offset, len(f.Fields)],
+            if f.IsArray: array_items += [self.Fields.index(f) + a_offset, (len(f.Fields) if f.Type=="object" else 1)],
             if f.Type == "object": a_offset += len(f.Fields) - 1
 
+        print(array_items)
         rows_index = 0
         for row in csv.reader(data, csv.excel, delimiter=","):
             if rows_index < headlines:
@@ -65,7 +73,7 @@ class SchemeDefinition:
                 continue
 
             in_array: bool = InArray(row, array_items)
-            if (not in_array): items += {},
+            if (not in_array or len(items)==0): items += {},
 
             if (len(list(filter(None, row))) == 0): continue
             item = items[-1]
@@ -102,4 +110,6 @@ class SchemeDefinition:
 
                 if field.Type != "object":
                     cell_index += 1
+
+        if (self.Attrs.get("as_single")): return items[0]
         return items
