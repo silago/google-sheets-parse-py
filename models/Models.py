@@ -37,11 +37,18 @@ class JsonModel:
         item.save()
 
 class BaseModel(Model):
-    def FillAndSave(self,data):
+    def FillAndSave(self,data, save = True):
+        sub_items = []
         for key in self._definition.field_assoc:
-            if (not hasattr(self,key)): continue#,data[val])
+            if (not hasattr(self,key)):
+                continue#,data[val])
+
 
             val = self._definition.field_assoc[key]
+
+            if (not save):
+                self.owner_id = 1
+
             data_val = data[val]
             if (type(data_val)!=list):
                 setattr(self,key,data[val])
@@ -53,17 +60,33 @@ class BaseModel(Model):
                     sub_model = attr
                     fk_field = getattr(sub_model,field_data.get("attributes").get("fk"))
                     sub_model.bind(self._meta.database, bind_refs=False, bind_backrefs=False)
-                    sub_items = sub_model.delete().where(fk_field == item_id).execute()
+                    sub_model.delete().where(fk_field == item_id).execute()
 
                     subfields = field_data["fields"]
 
                     sub_model._definition.field_assoc = {subfields[i]["db_name"]:subfields[i]["name"] for i in subfields}
-
                     for sub_data in data_val:
                         sub_item = sub_model()
-                        sub_item.FillAndSave(sub_data)
-                        sub_item.save()
-        self.save()
+
+                        try:
+                            sub_item = sub_item.FillAndSave(sub_data, False)
+                            setattr(sub_item,field_data.get("attributes").get("fk"),item_id)
+                            sub_item.save()
+                        except Exception as e:
+                            print(e)
+                            pass
+
+                        #sub_item.owner_id=1
+                        #print("owner_id")
+                        #print(sub_item.owner_id)
+
+                        #print("count")
+                        #print(sub_item.count)
+                        #print(sub_item)
+                        #print(sub_item.save())
+        if (save):
+            self.save()
+        return self
 
     class Meta:
         pass
@@ -91,6 +114,27 @@ class Groups(BaseModel):
         count  = IntegerField()
         chance  = IntegerField()
         index  = IntegerField()
+
+        def FillAndSave(self,data, save = True):
+            _data = {
+                'index':data["index"],
+                'chance':data["chance"],
+                'count':data["count"],
+                'boost_id':None,
+                'currency_id':None,
+                'chest_group_id':None
+            }
+            if (data["id_type"] == 1 ):
+                self.currency_id=data["item_id"]
+            elif (data["id_type"] == 2):
+                self.boost_id=data["item_id"]
+            elif (data["id_type"] == 3):
+                _data['chest_group_id'] = data["item_id"]
+                self.chest_group_id=data["item_id"]
+
+            return super(Groups.chest_contents,self).FillAndSave(data)
+
+
 
         class _definition:
             pass

@@ -19,15 +19,6 @@ from models import Models as M
 
 
 
-name = sys.argv[1]
-path = sys.argv[2]
-connection_string = sys.argv[3]
-DB=connect(connection_string)
-#DB =  connect("mysql://root@localhost:/db_candy2")
-Main(name, path)
-
-
-
 """ dynamoic model creator """
 class ClassCreator:
     def Create(name,definition):
@@ -88,3 +79,11 @@ def Main(id, path):
             for json_data in json_data:
                 item, created = model.get_or_create(**{model._definition.pk : json_data[model._definition.field_assoc[model._definition.pk]]})
                 item.FillAndSave(json_data)
+
+
+name = sys.argv[1]
+path = sys.argv[2]
+connection_string = sys.argv[3]
+DB=connect(connection_string)
+#DB =  connect("mysql://root@localhost:/db_candy2")
+Main(name, path)
