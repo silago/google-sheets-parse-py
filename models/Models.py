@@ -69,8 +69,8 @@ class BaseModel(Model):
                         sub_item = sub_model()
 
                         try:
-                            sub_item = sub_item.FillAndSave(sub_data, False)
                             setattr(sub_item,field_data.get("attributes").get("fk"),item_id)
+                            sub_item = sub_item.FillAndSave(sub_data, False)
                             sub_item.save()
                         except Exception as e:
                             print(e)
