@@ -10,7 +10,7 @@ class FileStats:
     dateMod = None
     version = None
 
-    def getModDate(self):
+    def getModDate(self) -> str:
         return str(int(os.path.getmtime(self.abspath)))
 
     def getMd5(self):
