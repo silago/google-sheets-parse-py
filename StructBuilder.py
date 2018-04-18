@@ -11,3 +11,5 @@ else:
     if (path[0]!="/" and path[0]!="~"):
         path = os.path.join(os.path.abspath(os.path.dirname(__file__)),path)
     Main(path)
+
+
