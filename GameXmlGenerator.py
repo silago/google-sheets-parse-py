@@ -33,7 +33,7 @@ def Main(out_name : str, path : str) -> None:
 
     doc = ElementTree(top)
     outFile = open(name, 'wb')
-    doc.write(outFile, xml_declaration=True)
+    doc.write(outFile, encoding='UTF-8', xml_declaration=True)
 
 name = sys.argv[1]
 path = sys.argv[2]
