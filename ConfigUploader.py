@@ -59,7 +59,7 @@ MODEL_ASSOC = {
 }
 
 def Main(id, path):
-    url = "https://docs.google.com/spreadsheets/d/" + id + "/gviz/tq?tqx=out:csv&sheet="
+    url = "http://docs.google.com/spreadsheets/d/" + id + "/gviz/tq?tqx=out:csv&sheet="
     print("parsing " + url)
     schemes = ParseScheme(url)
     for scheme in schemes:
