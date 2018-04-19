@@ -22,7 +22,7 @@ def ParseScheme(url, name=""):
 
 
 def Main(id, out):
-    url = "https://docs.google.com/spreadsheets/d/" + id + "/gviz/tq?tqx=out:csv&sheet="
+    url = "http://docs.google.com/spreadsheets/d/" + id + "/gviz/tq?tqx=out:csv&sheet="
     print("parsing " + url)
     schemes = ParseScheme(url)
     if not os.path.exists(out):
