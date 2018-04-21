@@ -61,14 +61,12 @@ MODEL_ASSOC = {
 }
 
 
-def Main(id, path, save_query=True):
+def Main(id, path, save_query=False):
     url = "http://docs.google.com/spreadsheets/d/" + id + "/gviz/tq?tqx=out:csv&sheet="
     print("parsing " + url)
     schemes = ParseScheme(url)
     for scheme in schemes:
         result = ()
-        if scheme.Name != "Chests":
-            continue
         if ("db_ignore" in scheme.Attrs):
             continue
         if (scheme.Name in MODEL_ASSOC):
@@ -83,14 +81,17 @@ def Main(id, path, save_query=True):
         file = open(os.path.join(path, scheme.Name + ".json"))
         json_data = json.load(file)
         for json_data in json_data:
-            try:
-                _item = model.get(
-                    **{model._definition.pk: json_data[model._definition.field_assoc[model._definition.pk]]})
-            except Exception as e:
-                _item = model(**{model._definition.pk: json_data[model._definition.field_assoc[model._definition.pk]]})
-                _ = _item.save_query(force_insert=True)
-                result += (_,)
-                print(_)
+            if (not save_query):
+                _item, created= model.get_or_create( **{model._definition.pk: json_data[model._definition.field_assoc[model._definition.pk]]})
+            else:
+                try:
+                    _item = model.get(
+                        **{model._definition.pk: json_data[model._definition.field_assoc[model._definition.pk]]})
+                except Exception as e:
+                    print(e)
+                    _item = model(**{model._definition.pk: json_data[model._definition.field_assoc[model._definition.pk]]})
+                    _ = _item.save_query(force_insert=True)
+                    result += (_,)
 
             # item, created = model.get_or_create(**{model._definition.pk : json_data[model._definition.field_assoc[model._definition.pk]]})
             item = _item
@@ -100,7 +101,7 @@ def Main(id, path, save_query=True):
                 for i in item.GetQuery(json_data):
                     print(i)
             else:
-                for i in item.FillAndSave(json_data): print(i)
+                r = item.FillAndSave(json_data)
 
 
 name = sys.argv[1]

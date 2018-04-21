@@ -11,12 +11,11 @@ def Download(url, name):
 
 
 class SchemeDefinition:
-    def __init__(self, base, row):
+    def __init__(self, base, row, part = 1):
         self.Fields = []
         fields = row
         self.Name = fields[0]
-        self.ListName = fields[1]
-        self.Scheme = fields[2].split(";")
+        self.Scheme = fields[part].split(";")
         self.Base = base
         if len(self.Scheme) <= 1: return
         header = self.Scheme[0].split(",")
@@ -29,6 +28,8 @@ class SchemeDefinition:
             l = line.strip()
             if l != "" and l[0] != "#":
                 self.Fields += fieldDef.FieldDef(l),
+
+        self.ListName = self.Attrs.get("List")
 
 
     def ParseData(self):
@@ -44,9 +45,29 @@ class SchemeDefinition:
             elif type == "bool":
                 return item == '"True"'
 
-        def InArray(row, fields):
 
-            _row = row[:]
+        def InArray(row, fields, inner=False):
+            _row = row[:] # _row is copy of row
+            _counter = 0
+            for f in fields:
+                if f.IsArray:
+                    for x in f.Fields:
+                        if x.Type=="object":
+                            for y in x.Fields: _counter+=1
+                        else:
+                            _counter+=1
+                elif f.Type=="object":
+                    for x in f.Fields:
+                        if (row[_counter]): return False
+                        _counter+=1
+                else:
+                    if (row[_counter]): return False
+                    _counter+=1
+            return True
+
+
+
+
             for f in fields:
                 for i in range(f[0], f[0] + f[1]):
                     _row[i] = None
@@ -60,10 +81,10 @@ class SchemeDefinition:
 
         items = []
         array_items = []
-        a_offset = 0
-        for f in self.Fields:
-            if f.IsArray: array_items += [self.Fields.index(f) + a_offset, (len(f.Fields) if f.Type=="object" else 1)],
-            if f.Type == "object": a_offset += len(f.Fields) - 1
+        #a_offset = 0
+        #for f in self.Fields:
+        #    if f.IsArray: array_items += [self.Fields.index(f) + a_offset, (len(f.Fields) if f.Type=="object" else 1)],
+        #    if f.Type == "object": a_offset += len(f.Fields) - 1
 
         rows_index = 0
         for row in csv.reader(data, csv.excel, delimiter=","):
@@ -71,8 +92,9 @@ class SchemeDefinition:
                 rows_index += 1
                 continue
 
-            in_array: bool = InArray(row, array_items)
-            if (not in_array or len(items)==0): items += {},
+            in_array: bool = InArray(row, self.Fields)
+            if (not in_array or len(items)==0 ):
+                items += {},
 
             if (len(list(filter(None, row))) == 0): continue
             item = items[-1]
@@ -94,9 +116,16 @@ class SchemeDefinition:
                     val = SetType(field.Type, row[cell_index])
                 elif field.Type == "object":
                     val = {}
+                    # TODO:: separate to inner function
                     for sub in field.Fields:
-                        val[sub.Name] = SetType(sub.Type, row[cell_index])
-                        cell_index += 1
+                        if(sub.Type=="object"):
+                            val[sub.Name]={}
+                            for inner_sub_field in sub.Fields:
+                                val[sub.Name][inner_sub_field.Name] = SetType(inner_sub_field.Type, row[cell_index])
+                                cell_index+=1
+                        else:
+                            val[sub.Name] = SetType(sub.Type, row[cell_index])
+                            cell_index += 1
 
                 if (field.IsArray):
                     if field.Name in item:
@@ -110,5 +139,20 @@ class SchemeDefinition:
                 if field.Type != "object":
                     cell_index += 1
 
-        if (self.Attrs.get("as_single")): return items[0]
+
+            pk_field = self.Attrs.get("pk")
+            if pk_field and len(items)>1 and (items[-1].get(pk_field) == items[-2].get(pk_field)):
+                curr = items[-1]
+                prev = items[-2]
+                for f in self.Fields:
+                    if f.IsArray:
+                        prev[f.Name]+=curr[f.Name]
+                items=items[0:-1]
+
+        as_object = self.Attrs.get("as_object")
+        if (as_object):
+            return {as_object:items}
+
+        if (self.Attrs.get("as_single")):
+            return items[0]
         return items

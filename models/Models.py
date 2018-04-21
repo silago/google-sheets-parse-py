@@ -127,17 +127,21 @@ class BaseModel(Model):
                     sub_model.bind(self._meta.database, bind_refs=False, bind_backrefs=False)
                     query=sub_model.delete().where(fk_field == item_id).execute()
                     #print(_query)
-                    query+=_query
+                    #query+=_query
                     subfields = field_data["fields"]
                     sub_model._definition.field_assoc = {subfields[i]["db_name"]: subfields[i]["name"] for i in
                                                          subfields}
+
                     for sub_data in data_val:
                         sub_item = sub_model()
                         try:
                             setattr(sub_item, field_data.get("attributes").get("fk"), item_id)
                             sub_item = sub_item.FillAndSave(sub_data, False)
+                            print("qwe")
+                            print(sub_item)
                             query += sub_item
                         except Exception as e:
+                            print("ewq")
                             print(e)
                             pass
 
