@@ -22,6 +22,7 @@ def Main(id, out):
         os.mkdir(out)
     print("parsing " + url)
 
+
     main_scheme = Download(url).read().decode("utf-8").splitlines()
     for row in csv.reader(main_scheme, csv.excel, delimiter=","):
         row = list(filter(None,row))

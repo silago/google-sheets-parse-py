@@ -141,13 +141,14 @@ class SchemeDefinition:
 
 
             pk_field = self.Attrs.get("pk")
-            if pk_field and len(items)>1 and (items[-1].get(pk_field) == items[-2].get(pk_field)):
+            if pk_field and len(items)>1 and (items[-1].get(pk_field) == items[-2].get(pk_field)) and items[-1].get(pk_field!=None):
                 curr = items[-1]
                 prev = items[-2]
                 for f in self.Fields:
                     if f.IsArray:
                         prev[f.Name]+=curr[f.Name]
                 items=items[0:-1]
+
 
         as_object = self.Attrs.get("as_object")
         if (as_object):
