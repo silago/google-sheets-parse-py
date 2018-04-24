@@ -37,9 +37,9 @@ class SchemeDefinition:
             if item is None:
                 return item
             if type == "float":
-                return float(item) if item != "" else float(0)
+                return float(item) if item != "" else None
             if type == "int":
-                return int(item) if item != "" else 0
+                return int(item) if item != "" else None
             elif type == "string":
                 return str(item)
             elif type == "bool":
@@ -128,11 +128,11 @@ class SchemeDefinition:
                             cell_index += 1
 
                 if (field.IsArray):
-                    if field.Name in item:
-                        item[field.Name] += val,
-                    else:
-                        item[field.Name] = [val, ]
-
+                    if val != None:
+                        if field.Name in item:
+                            item[field.Name] += val,
+                        else:
+                            item[field.Name] = [val, ]
                 else:
                     item[field.Name] = val
 
