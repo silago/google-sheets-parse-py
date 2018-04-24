@@ -150,10 +150,11 @@ class SchemeDefinition:
                 items=items[0:-1]
 
 
+        if (self.Attrs.get("as_single")):
+            items=items[0]
+
         as_object = self.Attrs.get("as_object")
         if (as_object):
             return {as_object:items}
 
-        if (self.Attrs.get("as_single")):
-            return items[0]
         return items
