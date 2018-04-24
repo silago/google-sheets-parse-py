@@ -3,6 +3,7 @@
 import csv
 from urllib import request, parse
 from . import fieldDef
+import json
 
 def Download(url, name):
     name = parse.quote(name)
@@ -36,10 +37,12 @@ class SchemeDefinition:
         def SetType(type, item):
             if item is None:
                 return item
+            if type == "json":
+                return json.loads(item)
             if type == "float":
-                return float(item) if item != "" else None
+                return float(item) if item != "" else float(0)
             if type == "int":
-                return int(item) if item != "" else None
+                return int(item) if item != "" else 0
             elif type == "string":
                 return str(item)
             elif type == "bool":
