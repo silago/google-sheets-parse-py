@@ -131,11 +131,11 @@ class SchemeDefinition:
                             cell_index += 1
 
                 if (field.IsArray):
-                    if val != None:
-                        if field.Name in item:
-                            item[field.Name] += val,
-                        else:
-                            item[field.Name] = [val, ]
+                    if field.Name in item:
+                        item[field.Name] += val,
+                    else:
+                        item[field.Name] = [val, ]
+
                 else:
                     item[field.Name] = val
 
@@ -144,7 +144,8 @@ class SchemeDefinition:
 
 
             pk_field = self.Attrs.get("pk")
-            if pk_field and len(items)>1 and (items[-1].get(pk_field) == items[-2].get(pk_field)) and items[-1].get(pk_field!=None):
+            if pk_field and len(items)>1 and (items[-1].get(pk_field) == items[-2].get(pk_field)) and items[-2].get(pk_field)!=None:
+                print("!!!!!")
                 curr = items[-1]
                 prev = items[-2]
                 for f in self.Fields:
@@ -154,7 +155,7 @@ class SchemeDefinition:
 
 
         if (self.Attrs.get("as_single")):
-            items=items[0]
+            return items[0]
 
         as_object = self.Attrs.get("as_object")
         if (as_object):
